@@ -2288,24 +2288,79 @@ Plot dendrogram with heatmap (here similarity matrix):
 Searching PubChem
 =================
 
-Get Compounds from PubChem by Id
+Get Compound SDF from PubChem by Id
 --------------------------------
 
-The function `getIds` accepts one or more numeric PubChem
+The function `pubchemCidToSDF` (alias `getIds`) accepts one or more numeric PubChem
 compound ids and downloads the corresponding compounds from PubChem
 Power User Gateway (PUG) returning results in an `SDFset`
-container. The ChemMine Tools web service is used as an intermediate, to
-translate queries from plain HTTP POST to a PUG SOAP query.  
+container.  
 
 Fetch 2 compounds from PubChem:
 
 
-```{r getIds, eval=FALSE, tidy=FALSE}
- compounds <- getIds(c(111,123))
+```{r pubchemCidToSDF, eval=FALSE, tidy=FALSE}
+ compounds <- pubchemCidToSDF(c(111,123))
  compounds 
 ```
 
 <div align="right">[Back to Table of Contents]()</div>
+
+
+Get Compound SDF from PubChem by InChIkey
+--------------------------------
+The function `pubchemInchikey2sdf` accepts one or more character PubChem
+compound InChIkey(s) and downloads the corresponding compounds from PubChem
+Power User Gateway (PUG) returning results in list of two items. The list item is 
+the `SDFset` container of all successful queries. The second item is a named numeric 
+vector. This vector records whether an InChIkey has a successful return. If the InChIkey query 
+is successful, a non-zero number is returned as the index of
+where it exists in the `SDFset` object for this InChIkey. If failed, `0` is returned.
+
+```{r pubchemInchikey2sdf, eval=FALSE, tidy=FALSE}
+inchikeys <- c(
+"ZFUYDSOHVJVQNB-FZERPYLPSA-N",
+"KONGRWVLXLWGDV-BYGOPZEFSA-N",
+"AANKDJLVHZQCFG-WLIQWNBFSA-N",
+"SNFRINMTRPQQLE-JQWAAABSSA-N"
+)
+# You should only have 2 SDF returned, 2 other not found
+inchikey_query <- pubchemInchikey2sdf(inchikeys)
+inchikey_query$sdf_set
+
+# successful queries
+inchikey_query_index <- inchikey_query$sdf_index[inchikey_query$sdf_index != 0]
+
+# get CID of these queries
+inchikey_query_cid <- cid(inchikey_query$sdf_set[inchikey_query_index])
+names(inchikey_query_cid) <- names(inchikey_query_index)
+inchikey_query_cid
+```
+
+
+Get Compound CID from PubChem by InChI
+--------------------------------
+The function `pubchemInchi2cid` accepts one or more character PubChem
+compound InChI string(s) and downloads the corresponding compound CID from PubChem
+Power User Gateway (PUG) returning results in a named numeric vector. Successful 
+requests will have empty names, requests with invalid InChI strings will have 
+name "invalid" and requests with valid InChI but not found in PubChem will have 
+name "not_found". Both "invalid" and "not_found" queries will have CID `0` as return.
+
+PubChem API allows users to only query one InChI a time, so this 
+function sends one PubChem API request per InChI. For courtesy reasons, the rate 
+is limited to 1 query per second. It is not recommended to parallelize this function. 
+
+```{r pubchemInchi2cid, eval=FALSE, tidy=FALSE}
+# first two are valid, third has no result, last is invalid 
+inchis <- c(
+ "InChI=1S/C15H26O/c1-9(2)11-6-5-10(3)15-8-7-14(4,16)13(15)12(11)15/h9-13,16H,5-8H2,1-4H3/t10-,11+,12-,13+,14+,15-/m1/s1", 
+ "InChI=1S/C3H8/c1-3-2/h3H2,1-2H3", 
+ "InChI=1S/C15H20Br2O2/c1-2-12(17)13-7-3-4-8-14-15(19-13)10-11(18-14)6-5-9-16/h3-4,6,9,11-15H,2,7-8,10H2,1H3/t5-,11-,12+,13+,14-,15-/m1/s1",
+ "InChI=abc"
+)
+pubchemInchi2cid(inchis)
+```
 
 Search a SMILES Query in PubChem
 --------------------------------
@@ -2321,7 +2376,8 @@ Search a SMILES string on PubChem:
 
 
 ```{r searchString, eval=FALSE, tidy=FALSE}
- compounds <- searchString("CC(=O)OC1=CC=CC=C1C(=O)O") compounds 
+compounds <- searchString("CC(=O)OC1=CC=CC=C1C(=O)O") 
+compounds 
 ```
 
 <div align="right">[Back to Table of Contents]()</div>
