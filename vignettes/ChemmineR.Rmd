@@ -2337,6 +2337,7 @@ names(inchikey_query_cid) <- names(inchikey_query_index)
 inchikey_query_cid
 ```
 
+<div align="right">[Back to Table of Contents]()</div>
 
 Get Compound CID from PubChem by InChI
 --------------------------------
@@ -2361,6 +2362,8 @@ inchis <- c(
 )
 pubchemInchi2cid(inchis)
 ```
+
+<div align="right">[Back to Table of Contents]()</div>
 
 Search a SMILES Query in PubChem
 --------------------------------
