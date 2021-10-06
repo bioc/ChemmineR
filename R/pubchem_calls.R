@@ -64,7 +64,7 @@ pubchemInchi2cid <- function(inchis, verbose = TRUE) {
     # are listed below, add more if I missed some one. minus/dash does not need to be 
     # escaped -LZ
     inchi_escaped <- stringi::stri_replace_all_fixed(
-        str = inchi,
+        str = inchis,
         pattern = c("/", "[", "]", "&", ",", "(", ")", "=", "+"),
         replacement = c("%2F", "%5B", "%5D", "%26", "%2C", "%28", "%29", "%3D", "%2B"),
         vectorize_all = FALSE
