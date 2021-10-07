@@ -2310,8 +2310,8 @@ Fetch 2 compounds from PubChem:
 Get Compound SDF from PubChem by InChIkey
 --------------------------------
 The function `pubchemInchikey2sdf` accepts one or more character PubChem
-compound InChIkey(s) and downloads the corresponding compounds from PubChem
-Power User Gateway (PUG) returning results in list of two items. The list item is 
+compound InChIkey(s) and downloads the corresponding compounds from PubChem's
+Power User Gateway (PUG). This returns the results in a list of two items. The first item is 
 the `SDFset` container of all successful queries. The second item is a named numeric 
 vector. This vector records whether an InChIkey has a successful return. If the InChIkey query 
 is successful, a non-zero number is returned as the index of
