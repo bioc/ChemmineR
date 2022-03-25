@@ -28,7 +28,9 @@ read.SDFset(sdfstr = sdfstr,skipErrors=FALSE, ...)
 		Defaults to TRUE.
 
 		extendedAttributes: true or false, whether to parse the extended attributes available on the
-		V3000 format. Defaults to FALSE.
+		V3000 format. Defaults to FALSE. When set to TRUE, the resulting objects will be of type
+		ExtSDF, which is a sub-class of SDF. However, some functions, such as plot, may not work with
+		this type right now. 
 
 	}
 }

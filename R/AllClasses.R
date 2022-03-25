@@ -149,7 +149,7 @@ setClass("SDF", representation(header="character", atomblock="matrix",
 
 
 
-.sdfParse <- function(sdf, datablock=TRUE, tail2vec=TRUE,extendedAttributes=TRUE) {
+.sdfParse <- function(sdf, datablock=TRUE, tail2vec=TRUE,extendedAttributes=FALSE) {
 	countpos <- grep("V\\d\\d\\d\\d$", sdf, perl=TRUE)
 	if(length(countpos)==0)  
 		countpos <- grep("V {0,}\\d\\d\\d\\d$", sdf, perl=TRUE) 
@@ -271,7 +271,7 @@ findPositions = function(sdf){
 
 }
 
-.parseV3000 <- function(sdf, datablock=TRUE, tail2vec=TRUE,extendedAttributes=TRUE) {
+.parseV3000 <- function(sdf, datablock=TRUE, tail2vec=TRUE,extendedAttributes=FALSE) {
 	#message("found V3000 formatted compound")
 	sdfLength = length(sdf)
 

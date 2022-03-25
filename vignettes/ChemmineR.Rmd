@@ -531,6 +531,20 @@ Create
  as(sdfstr, "SDFset") 
 ```
 
+SDFs in V3000 format can also be imported, this format will be detected automacially. If you want
+to also be able to access the extended attributes of this format, you should set `extendedAttributes=TRUE`
+on `read.SDFset`. 
+```{r eval=TRUE, tidy=FALSE}
+ v3 <- read.SDFset("https://cluster.hpcc.ucr.edu/~tgirke/Documents/R_BioCond/Samples/v3000.sdf",extendedAttributes=TRUE) 
+```
+This will have the side effect of producing an `SDFset` composed of `ExtSDF` objects, which
+are sub-classes of `SDF` objects. Not all SDF methods will work on this sub-type currently. 
+```{r eval=TRUE, tidy=FALSE}
+getAtomAttr(v3[[1]],17,"CHG")
+getBondAttr(v3[[1]],10,"CFG")
+```
+This example will fetch the value of the atom attribute "CHG" on atom 16, and the value of the bond attribute "CFG" on bond 10. 
+
 <div align="right">[Back to Table of Contents]()</div>
 
 SMILES Import

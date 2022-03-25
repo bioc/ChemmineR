@@ -28,8 +28,8 @@ the argument \code{extendedAttributes} is set to "TRUE".
 }
 \section{Methods}{
   \describe{
-    \item{getAtomAttr}{\code{signature(x = "ExtSDF")}: returns atom attributes as a named list of values}
-    \item{getBondAttr}{\code{signature(x = "ExtSDF")}: returns bond attributes as a named list of values}
+    \item{getAtomAttr}{\code{signature(x = "ExtSDF",atomId,tag)}: Returns the value of the given tag on the given atom number  }
+    \item{getBondAttr}{\code{signature(x = "ExtSDF",bondId,tag)}: Returns the value of the given tag on the given bond number  }
     \item{show}{\code{signature(object = "ExtSDF")}: prints summary of \code{SDF} as well as any defined extended
 							 attributes for the atoms or bonds}
 	 }
