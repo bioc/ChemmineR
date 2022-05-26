@@ -864,7 +864,7 @@ sdf2smilesOB <- function(sdf) {
 	 t=Reduce(rbind,strsplit(unlist(strsplit(convertFormat("SDF","SMI",defs),
 														  "\n",fixed=TRUE)),
 				 "\t",fixed=TRUE))
-	 if(is.character(t)){ # R rearranged our matrix because there was only one result
+	 if(!is.matrix(t)){ # R rearranged our matrix because there was only one result
 		 smiles=t[1]
 		 names(smiles)=t[2]
 	 }else{
