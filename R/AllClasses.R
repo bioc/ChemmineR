@@ -2081,7 +2081,13 @@ groups <- function(x, groups="fctgroup", type="countMA") {
         if(groups=="fctgroup" & (type=="count" | type=="all")) stop("when groups=\"fctgroup\", only type=\"countMA\" can be used")
         mylength <- length(x)
         ## Support for single molecule objects
-	if(mylength==1) { x <- as(x, "SDFset"); y <- x; z <- x; cid(z) <- "dummy"; x <- c(y, z) }
+	     if(mylength==1) { 
+			  x <- as(x, "SDFset"); 
+			  y <- x; 
+			  z <- x; 
+			  cid(z) <- "dummy"; 
+			  x <- c(y, z) 
+		  }
         ## Generate neighbor counts
 	neighbors <- .neighbors(x, type)
         ## Return neighbor counts if requested
@@ -2110,7 +2116,8 @@ groups <- function(x, groups="fctgroup", type="countMA") {
 	if(mylength>1) {
                 return(groupMA)
         } else {
-                return(groupMA[1,])
+                return(groupMA[1,,drop=FALSE])
+		  
         }
 }
 ## Usage:
