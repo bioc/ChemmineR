@@ -17,7 +17,7 @@ exportClasses(
 ## Source: AllClasses.R
 exportMethods(
     "sdfstr2list", "sdf2list", "sdf2str", "SDFset2list", "SDFset2SDF",
-    "sdfstr2list<-", "SDFset2SDF<-", "cid<-", 
+    "sdfstr2list<-", "SDFset2SDF<-", "cid<-", "sdfid<-",
     "header<-", "atomblock<-", "bondblock<-", "datablock<-",
     "[", "[[", "[<-", "[[<-", "coerce",
     "show", "length", "c", "plot", "as.matrix", 

@@ -509,6 +509,14 @@ setGeneric(name="header", def=function(x) standardGeneric("header"))
 setMethod(f="header", signature="SDF", definition=function(x) {return(x@header)}) 
 setGeneric(name="sdfid", def=function(x, tag=1) standardGeneric("sdfid"))
 setMethod(f="sdfid", signature="SDF", definition=function(x, tag=1) {return(x@header[tag])}) 
+
+setGeneric(name="sdfid<-", def=function(x, value) standardGeneric("sdfid<-"))
+setReplaceMethod(f="sdfid", signature="SDF", definition=function(x, value) {
+	x@header[1]=value	
+	return(x)
+})
+
+
 setGeneric(name="atomblock", def=function(x) standardGeneric("atomblock"))
 setMethod(f="atomblock", signature="SDF", definition=function(x) {return(x@atomblock)}) 
 setGeneric(name="atomcount", def=function(x, addH=FALSE, ...) standardGeneric("atomcount"))
@@ -734,6 +742,18 @@ setReplaceMethod(f="cid", signature="SDFset", definition=function(x, value) {
 	x@ID <- value 
 	if(any(duplicated(x@ID))) { 
 		warning("The values in the CMP ID slot are not unique anymore. To fix this, run: cid(sdfset) <- makeUnique(cid(sdfset))")
+	}
+	return(x)
+})
+
+## Replacement method for molecule name of each SDF in an SDFset using accessor methods
+setGeneric(name="sdfid<-", def=function(x, value) standardGeneric("sdfid<-"))
+setReplaceMethod(f="sdfid", signature="SDFset", definition=function(x, value) {
+	if(length(x@SDF) != length(value)){
+		stop("length of assigned value does not match length of assignee")
+	}
+	for(i in seq_along(x@SDF)){
+		sdfid(x[[i]]) = value[i]
 	}
 	return(x)
 })
