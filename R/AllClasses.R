@@ -168,7 +168,7 @@ setClass("SDF", representation(header="character", atomblock="matrix",
 	Nbond <- as.numeric(substring(countline, 4, 6))
 	start <- c(header=1, atom=countpos+1, bond=countpos+Natom+1, extradata=countpos+Natom+Nbond+1)
 	index <- cbind(start=start, end=c(start[2:3], start[4], length(sdf)+1)-1)
-	
+
 	## Header block
 	header <- sdf[index["header",1]:index["header",2]]
 	if(length(header)==4) names(header) <- c("Molecule_Name", "Source", "Comment", "Counts_Line")	
@@ -176,8 +176,8 @@ setClass("SDF", representation(header="character", atomblock="matrix",
 	## Atom block
 	## format: x y z <atom symbol> 
 	ab2matrix <- function(ct=sdf[index["atom",1]:index["atom",2]]) {
-		if((index["atom","end"] - index["atom","start"]) < 1) {
-			ctma <- matrix(rep(0,2), 1, 2, dimnames=list("0", c("C1", "C2"))) # Creates dummy matrix in case there is none.
+		if((index["atom","end"] - index["atom","start"]) < 0) {
+			ctma <- matrix(rep(0,3), 1, 3, dimnames=list("0", c("C1", "C2","C3"))) # Creates dummy matrix in case there is none.
 		} else {
 			ct <- gsub("^ {1,}", "", ct)
 			ctlist <- strsplit(ct, " {1,}")
@@ -207,19 +207,18 @@ setClass("SDF", representation(header="character", atomblock="matrix",
 	
 	## Bond block
 	bb2matrix <- function(ct=sdf[index["bond",1]:index["bond",2]]) {
-		#if((index["bond","end"] - index["bond","start"]) < 1) {
-		if(((index["bond","end"] - index["bond","start"])+1) < 1) {
-                        ctma <- matrix(rep(0,2), 1, 2, dimnames=list("0", c("C1", "C2"))) # Creates dummy matrix in case there is none.
-                } else {
+     if((index["bond","end"] - index["bond","start"]) < 0) {
+                    ctma <- matrix(rep(0,3), 1, 3, dimnames=list("0", c("C1", "C2","C3"))) # Creates dummy matrix in case there is none.
+     } else {
                     ct <- gsub("^(...)(...)(...)(...)(...)(...)(...)", "\\1 \\2 \\3 \\4 \\5 \\6 \\7", ct)
                     ct <- gsub("(^..\\d)(\\d)", "\\1 \\2", ct) # Splits bond strings where one or both of the atoms have 3 digit numbers
-		    ct <- gsub("^ {1,}", "", ct)
+                    ct <- gsub("^ {1,}", "", ct)
                     ctlist <- strsplit(ct, " {1,}")
                     ctma <- matrix(unlist(ctlist), ncol=length(ctlist[[1]]), nrow=length(ct), byrow=TRUE)
                     Ncol <- length(ctlist[[1]])
                     ctma <- matrix(as.numeric(ctma), nrow=length(ct), ncol=Ncol, dimnames=list(1:length(ct), paste("C", 1:Ncol, sep="")))	
-		}
-                return(ctma)
+	  }
+     return(ctma)
 	}
 	bondblock <- bb2matrix(ct=sdf[index["bond",1]:index["bond",2]])
 	
@@ -277,7 +276,6 @@ findPositions = function(sdf){
 
 	tagPositions=findPositions(sdf)
 
-
 	ctabPos = tagPositions[1]
 	if(ctabPos == -1){
 		header = sdf[1:4]
@@ -295,17 +293,12 @@ findPositions = function(sdf){
 
 	#message("parsing atomblock")
 	atomPos = tagPositions[3]
-	if(atomPos == -1){
-		warning("No ATOM block found in ",sdf[1]," returning a dummy atom block")
-		atomblock <- matrix(rep(0,2), 1, 2, dimnames=list("0", c("C1", "C2"))) # Creates dummy matrix in case there is none.
+	atomEndPos = tagPositions[4]
+	if(atomPos == -1 || atomEndPos == -1 || atomPos + 1 == atomEndPos){
+		warning("Empty or missing ATOM block in ",sdf[1]," returning a dummy atom block")
+		atomblock <- matrix(rep(0,3), 1, 3, dimnames=list("0", c("C1", "C2","C3"))) # Creates dummy matrix in case there is none.
 	}else{
 		#message("atomPos: ",atomPos," class: ",class(atomPos))
-		atomEndPos = tagPositions[4]
-		if(atomEndPos == -1){
-				warning("Could not find the end of the ATOM block in ",sdf[1])
-				atomEndPos = atomPos + 1 #assume and emtpy atom block
-		}
-
 		
 		data = Reduce(rbind,Map(function(line) {
 				parts = cstrsplit(line)
@@ -313,10 +306,10 @@ findPositions = function(sdf){
 								paste(parts[9:length(parts)],collapse=" ")
 						  else ""
 				c(parts[3:7],attrs)
-			}, sdf[(atomPos+1):(atomEndPos-1)]))  #TODO: check for empty range
+			}, sdf[(atomPos+1):(atomEndPos-1)]),list()) 
 		#if(extendedAttributes)
 		#	extAtomAttrs = parseAttributes(data[,6])
-		extAtomAttrs = parseAttributes(data[,6])
+		extAtomAttrs = parseAttributes(data[,6,drop=FALSE])
 
 
 		# we need to tranlate certain "Standard" attribute values from v3k back
@@ -365,26 +358,21 @@ findPositions = function(sdf){
 		}
 
     	#print(extAtomAttrs)
-		atomblock =cbind(data[,3:5],standardAttrs)
+		atomblock =cbind(data[,3:5,drop=FALSE],standardAttrs)
 		mode(atomblock)="numeric"
 		#print(atomblock)
 		colnames(atomblock) = paste("C",c(1:3,5:11),sep="")
-		rownames(atomblock) = paste(data[,2],data[,1],sep="_")
+		rownames(atomblock) = paste(data[,2,drop=FALSE],data[,1,drop=FALSE],sep="_")
 	}
 
 
 	#message("parsing bond block")
 	bondPos = tagPositions[5]
-	if(bondPos == -1){
-		warning("No BOND block found in ",sdf[1]," returning a dummy bond block")
-		bondblock <- matrix(rep(0,2), 1, 2, dimnames=list("0", c("C1", "C2"))) # Creates dummy matrix in case there is none.
+	bondEndPos = tagPositions[6]
+	if(bondPos == -1 || bondEndPos == -1 ||  bondPos + 1 == bondEndPos){
+		warning("Empty or missing BOND block in ",sdf[1]," returning a dummy bond block")
+		bondblock <- matrix(rep(0,3), 1, 3, dimnames=list("0", c("C1", "C2","C3"))) # Creates dummy matrix in case there is none.
 	}else{
-		bondEndPos = tagPositions[6]
-		if(bondEndPos == -1){
-	  		warning("Could not find the end of the BOND block in ",sdf[1])
-	  		bondEndPos = bondPos + 1 #assume and emtpy atom block
-		}
-
 		data = Reduce(rbind,Map(function(line) {
 				#cstrsplit(line)[3:6]
 				parts = cstrsplit(line)
@@ -392,8 +380,8 @@ findPositions = function(sdf){
 								paste(parts[7:length(parts)],collapse=" ")
 						  else ""
 				c(parts[3:6],attrs)
-			}, sdf[(bondPos+1):(bondEndPos-1)]))  #TODO: check for empty range
-		extBondAttrs = parseAttributes(data[,5])  # +2.6s
+			}, sdf[(bondPos+1):(bondEndPos-1)]),list())  
+		extBondAttrs = parseAttributes(data[,5,drop=FALSE])  # +2.6s
 
 		# CFG  bond configuration(stereo)  change: 0 -> 0, 1-> 1, 2-> 4, 3->6
 		# empty slot
@@ -418,11 +406,10 @@ findPositions = function(sdf){
 			}
 		}
 
-		bondblock = cbind(data[,c(3,4,2)],standardAttrs) # +0.5s
-		#bondblock = data[,c(3,4,2)]
+		bondblock = cbind(data[,c(3,4,2),drop=FALSE],standardAttrs) # +0.5s
 		mode(bondblock)="numeric"
 		colnames(bondblock) = paste("C",1:7,sep="")
-		rownames(bondblock) = data[,1]
+		rownames(bondblock) = data[,1,drop=FALSE]
 	}
 
 
@@ -899,7 +886,7 @@ setMethod(f="sdf2str", signature="SDF", definition = function(sdf, head, ab, bb,
 	if(missing(ab)) {
 		ab <- sdf[[2]]
 		#ab <- cbind(Indent="", format(ab[,1:3], width=9, justify="right"), A=format(gsub("_.*", "", rownames(ab)), width=1, justify="right"), Space="", format(ab[,-c(1:3)], width=2, justify="right")) # Changed on 26-Aug-13
-		ab <- cbind(Indent="", format(ab[,1:3], width=9, justify="right"), A=format(gsub("_.*", "", rownames(ab)), width=1, justify="left"),  Space="", format(ab[,-c(1:3)], width=2, justify="right"))
+		ab <- cbind(Indent="", format(ab[,1:3,drop=FALSE], width=9, justify="right"), A=format(gsub("_.*", "", rownames(ab)), width=1, justify="left"),  Space="", format(ab[,-c(1:3),drop=FALSE], width=2, justify="right"))
 		ab <- sapply(seq(along=ab[,1]), function(x) paste(ab[x, ], collapse=" "))
 	}
 
