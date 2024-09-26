@@ -4,4 +4,4 @@
 #          PKG_LIBS += -stdlib=libstdc++
 #      endif
 #endif 
-PKG_CXXFLAGS =  -DNO_MAIN -DNO_DEBUG
+PKG_CXXFLAGS =  -DNO_MAIN -DNO_DEBUG -DSTRICT_R_HEADERS -DR_NO_REMAP

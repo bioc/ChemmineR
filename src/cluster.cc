@@ -291,7 +291,7 @@ void loadNNMatrix(int N, int K, int minNbrs, SEXP neighbors)
 				continue;
 			n--;
 			if(n < 0 || n >= N) //raise error
-				error("Index value %d out of range. Should be in [1,%d]",n,N);
+				Rf_error("Index value %d out of range. Should be in [1,%d]",n,N);
 
 			nbrs.push_back(n);
 		}
@@ -315,7 +315,7 @@ void loadNNList(int N,  int minNbrs,SEXP neighbors)
 	{
 		std::vector<int> nbrs;
 		SEXP row = VECTOR_ELT(neighbors,i);
-		int K = length(row);
+		int K = Rf_length(row);
 
 		for(int j=0; j<K; j++)  //cols
 		{  // R arrays are column major 
@@ -325,7 +325,7 @@ void loadNNList(int N,  int minNbrs,SEXP neighbors)
 				continue;
 			n--;
 			if(n < 0 || n >= N) //raise error
-				error("Index value %d out of range. Should be in [1,%d]",n,N);
+				Rf_error("Index value %d out of range. Should be in [1,%d]",n,N);
 
 			nbrs.push_back(n);
 		}
@@ -357,15 +357,15 @@ SEXP jarvis_patrick(SEXP neighbors,SEXP minNbrsSexp,
 	int linkage = INTEGER(linkageSexp)[0];
 
 
-	if(isNewList(neighbors))
+	if(Rf_isNewList(neighbors))
 	{
-		N = length(neighbors);
+		N = Rf_length(neighbors);
 		loadNNList(N,minNbrs,neighbors);
 	}
 	else
 	{
 
-		SEXP dims= getAttrib(neighbors,R_DimSymbol);
+		SEXP dims= Rf_getAttrib(neighbors,R_DimSymbol);
 		N = INTEGER(dims)[0]; // num compounds
 		K = INTEGER(dims)[1]; // num neighbors given
 		loadNNMatrix(N,K,minNbrs,neighbors);
@@ -383,7 +383,7 @@ SEXP jarvis_patrick(SEXP neighbors,SEXP minNbrsSexp,
 
 	//pull result out of s
 	SEXP result;
-   PROTECT(result = allocVector(INTSXP,N));
+   PROTECT(result = Rf_allocVector(INTSXP,N));
 	//Rprintf("allocated vector\n");
 
 

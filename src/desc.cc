@@ -175,10 +175,10 @@ SEXP genAPDescriptor(SEXP sdf)
 {
 	SimpleMolecule *mol = new SimpleMolecule();
 
-	SEXP atomblock = getAttrib(sdf,install("atomblock")); //named matrix
-	SEXP dimnames = getAttrib(atomblock,R_DimNamesSymbol);
+	SEXP atomblock = Rf_getAttrib(sdf,Rf_install("atomblock")); //named matrix
+	SEXP dimnames = Rf_getAttrib(atomblock,R_DimNamesSymbol);
 	SEXP atomnames = VECTOR_ELT(dimnames,0);
-	int numAtoms = length(atomnames);
+	int numAtoms = Rf_length(atomnames);
 	DEBUG_VAR(numAtoms);
 
 	for(int i=0; i < numAtoms; i++){
@@ -187,20 +187,20 @@ SEXP genAPDescriptor(SEXP sdf)
 		char* name = strdup(CHAR(STRING_ELT(atomnames,i)));
 		char* elem = strtok(name,"_");
 		if(elem==NULL){
-			error("bad compound name: %s\n",name);
+			Rf_error("bad compound name: %s\n",name);
 			return R_NilValue;
 		}
 		//DEBUG_VAR(elem);
 		char* idStr = strtok(NULL,"_");
 		if(idStr==NULL){
-			error("bad compound name: %s\n",name);
+			Rf_error("bad compound name: %s\n",name);
 			return R_NilValue;
 		}
 
 		//DEBUG_VAR(idStr);
 		int elemIndex = getElemIndex(elem);
 		if(elemIndex == -1){
-			error("element %s not found\n",elem);
+			Rf_error("element %s not found\n",elem);
 			return R_NilValue;
 		}
 		//DEBUG_VAR(elemIndex);
@@ -210,8 +210,8 @@ SEXP genAPDescriptor(SEXP sdf)
 		free(name);
 	}
 	
-	SEXP bondblock = getAttrib(sdf,install("bondblock")); //named matrix
-	SEXP dims = getAttrib(bondblock,R_DimSymbol);
+	SEXP bondblock = Rf_getAttrib(sdf,Rf_install("bondblock")); //named matrix
+	SEXP dims = Rf_getAttrib(bondblock,R_DimSymbol);
 	int nrows = INTEGER(dims)[0];
 	DEBUG_VAR(nrows);
 
@@ -230,12 +230,12 @@ SEXP genAPDescriptor(SEXP sdf)
 
 		Atom *a1 = mol->GetAtom(aid1);
 		if(a1 == NULL){
-			error("could not find atom number %d",aid1);
+			Rf_error("could not find atom number %d",aid1);
 			return R_NilValue;
 		}
 		Atom *a2 = mol->GetAtom(aid2);
 		if(a2 == NULL){
-			error("could not find atom number %d",aid1);
+			Rf_error("could not find atom number %d",aid1);
 			return R_NilValue;
 		}
 		mol->add_bond(*a1,*a2,bondType);
@@ -245,7 +245,7 @@ SEXP genAPDescriptor(SEXP sdf)
 	calc_desc(*mol,descs);
 
 	SEXP sDesc;
-	PROTECT(sDesc = allocVector(INTSXP,descs.size()));
+	PROTECT(sDesc = Rf_allocVector(INTSXP,descs.size()));
 	for(int i=0; i < descs.size(); i++)
 		INTEGER(sDesc)[i]=descs[i];
 	UNPROTECT(1);
